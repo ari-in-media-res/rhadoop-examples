@@ -1,0 +1,36 @@
+map <- function (k, lines){
+  
+  words.list <- strsplit(lines, split="\\s+", perl=TRUE)
+  words <- unlist(words.list)
+  return (keyval(words, 1))
+  
+}
+
+reduce <- function (word, counts){
+  
+  keyval(word, sum(counts))
+  
+}
+
+wordcount <- function (input, output=NULL){
+  mapreduce(
+    input='/user/vedant/wordcount/input', 
+    output='/user/vedant/wordcount/output', 
+    input.format="text",
+    output.format="native",
+    map=map, 
+    reduce=reduce)
+
+
+}
+
+
+hdfs.root <- 'wordcount'
+hdfs.data <- file.path(hdfs.root, 'data')
+hdfs.out <- file.path(hdfs.root, 'out')
+out <- wordcount(hdfs.data, hdfs.out)
+
+results <- from.dfs(out)
+results.df <- as.data.frame(results, stringsAsFactors=F)
+colnames(results.df) <- c('word', 'count')
+head(results.df)
